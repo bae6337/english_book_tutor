@@ -1,0 +1,25 @@
+{
+  "name": "English Book Tutor",
+  "short_name": "EnglishTutor",
+  "description": "영어 책을 읽으며 학습하는 인터랙티브 교육 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#4F46E5",
+  "theme_color": "#4F46E5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "books"],
+  "lang": "ko-KR"
+}
+

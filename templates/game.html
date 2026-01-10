@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#111827">
+    <title>🚀 Space Grammar - English Tutor</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            background-color: #111827;
+            color: white;
+            overflow: hidden; /* 스크롤 방지 */
+            touch-action: none; /* 모바일 터치 제스처 방지 */
+        }
+        
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #gameCanvas {
+            background: linear-gradient(to bottom, #0f172a, #1e293b);
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 1rem;
+            left: 0;
+            width: 100%;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none; /* UI가 게임 조작 방해하지 않게 */
+            z-index: 10;
+        }
+
+        .score-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4F46E5;
+            border: 1px solid rgba(79, 70, 229, 0.3);
+        }
+
+        .target-sentence {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            text-align: center;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 1rem;
+            border-radius: 12px;
+            pointer-events: none;
+            display: none; /* 게임 시작 전에는 숨김 */
+        }
+
+        .word-slot {
+            display: inline-block;
+            margin: 0 0.3rem;
+            padding: 0.2rem 0.5rem;
+            border-bottom: 2px solid #6B7280;
+            color: #9CA3AF;
+        }
+
+        .word-slot.filled {
+            color: #10B981;
+            border-bottom-color: #10B981;
+            font-weight: bold;
+        }
+
+        /* 시작/종료 오버레이 */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            text-align: center;
+        }
+
+        .overlay h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #4F46E5, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .overlay p {
+            margin-bottom: 2rem;
+            color: #D1D5DB;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #4F46E5, #4338CA);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5);
+            transition: transform 0.2s;
+            animation: pulse 2s infinite;
+        }
+        
+        .level-btn {
+            background: transparent;
+            border: 2px solid #4F46E5;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .level-btn:hover {
+            background: #4F46E5;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        .start-btn:active, .level-btn:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+
+        /* 모바일 컨트롤러 */
+        .mobile-controls {
+            position: absolute;
+            bottom: 2rem;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 2rem;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        .control-area {
+            pointer-events: auto;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* 레이저 효과 */
+        .laser {
+            box-shadow: 0 0 10px #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- 상단 UI -->
+        <div class="game-ui">
+            <div style="display:flex; gap:1rem; align-items:center;">
+                <a href="/" class="back-btn" style="pointer-events: auto;">⛔ 나가기</a>
+                
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <!-- 속도 조절 슬라이더 -->
+                    <div class="speed-control" style="background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; display: flex; align-items: center; gap: 10px; pointer-events: auto;" title="낙하 속도">
+                        <span style="font-size: 0.8rem;">🚀</span>
+                        <input type="range" id="speedSlider" min="0.1" max="2.0" step="0.1" value="1.0" style="width: 80px;">
+                    </div>
+                    <!-- 발음 기준 슬라이더 -->
+                    <div class="strict-control" style="background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; display: flex; align-items: center; gap: 10px; pointer-events: auto;" title="발음 정확도 (왼쪽: 관대함, 오른쪽: 엄격함)">
+                        <span style="font-size: 0.8rem;">🎙️</span>
+                        <input type="range" id="strictSlider" min="0.1" max="1.0" step="0.1" value="0.3" style="width: 80px;">
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display:flex; gap:1rem;">
+                <div class="score-box">COMBO: <span id="comboCount">0</span>/10</div>
+                <div class="score-box">SCORE: <span id="score">0</span></div>
+            </div>
+        </div>
+
+        <!-- 캔버스 -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- 목표 문장 표시 영역 -->
+        <div class="target-sentence" id="sentenceDisplay">
+            <!-- 자바스크립트로 단어 슬롯 생성 -->
+        </div>
+
+        <!-- 시작 화면 -->
+        <div class="overlay" id="startScreen">
+            <h2>Space Grammar</h2>
+            <p style="margin-bottom: 1rem;">문장의 순서대로 단어를 잡으세요!</p>
+            
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                <button class="level-btn" onclick="startGame('EASY')">🌱 쉬움 (30%)</button>
+                <button class="level-btn" onclick="startGame('NORMAL')">📚 보통 (60%)</button>
+                <button class="level-btn" onclick="startGame('HARD')">🔥 어려움 (90%)</button>
+            </div>
+        </div>
+
+        <!-- 게임 오버 화면 -->
+        <div class="overlay" id="gameOverScreen" style="display: none;">
+            <h2 id="resultTitle">GAME OVER</h2>
+            <p>최종 점수: <span id="finalScore">0</span></p>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-secondary" onclick="location.reload()">🔄 다시 하기</button>
+                <a href="/" class="btn btn-primary" id="exitBtn">🏠 홈으로</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모바일용 오디오 (효과음) -->
+    <script src="/static/js/game.js"></script>
+    <script>
+        // 전역 변수로 book_id 전달
+        const BOOK_ID = {{ book_id }};
+        
+        // 연습 모드면 버튼 텍스트 변경
+        if (BOOK_ID !== 0) {
+             document.getElementById('exitBtn').href = "/reader/" + BOOK_ID;
+             document.getElementById('exitBtn').textContent = "📖 책으로 돌아가기";
+        }
+    </script>
+</body>
+</html>
+

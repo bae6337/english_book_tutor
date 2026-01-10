@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4F46E5">
+    <title>📝 나의 단어장 - English Book Tutor</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <div class="header-content">
+                <a href="/" class="back-btn">← 뒤로</a>
+                <h1 class="page-title">📝 나의 단어장</h1>
+                <div class="level-badge small">
+                    <span class="level-text">Lv.<span id="userLevel">1</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <!-- 통계 -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-value" id="totalWords">0</div>
+                        <div class="stat-label">총 단어 수</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value" id="learnedWords">0</div>
+                        <div class="stat-label">학습 완료</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 검색 및 필터 -->
+            <section class="filter-section">
+                <input type="text" id="searchInput" placeholder="🔍 단어 검색..." 
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem;">
+            </section>
+
+            <!-- 단어 목록 -->
+            <section class="vocab-section">
+                <h3 class="section-title">학습 중인 단어</h3>
+                <div class="vocab-list" id="vocabList">
+                    <div class="loading">단어장을 불러오는 중...</div>
+                </div>
+            </section>
+
+            <!-- 복습 모드 버튼 -->
+            <div class="action-buttons">
+                <button class="btn btn-primary btn-large" onclick="startQuiz()">
+                    🎯 단어 퀴즈 시작
+                </button>
+            </div>
+        </main>
+
+        <!-- 하단 네비게이션 -->
+        <nav class="bottom-nav">
+            <a href="/" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">홈</span>
+            </a>
+            <a href="/library" class="nav-item">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">도서관</span>
+            </a>
+            <a href="/vocabulary" class="nav-item active">
+                <span class="nav-icon">📝</span>
+                <span class="nav-label">단어장</span>
+            </a>
+            <a href="#" class="nav-item" onclick="alert('준비중입니다!'); return false;">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">통계</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- 퀴즈 모달 -->
+    <div class="modal" id="quizModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🎯 단어 퀴즈</h3>
+                <button class="modal-close" onclick="closeQuiz()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="quizContent">
+                    <h4 style="font-size: 2rem; text-align: center; margin-bottom: 2rem;" id="quizWord">Word</h4>
+                    <div id="quizOptions" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- 선택지가 여기에 표시됩니다 -->
+                    </div>
+                    <div id="quizResult" style="margin-top: 1rem; text-align: center; display: none;">
+                        <p id="resultText" style="font-size: 1.2rem; font-weight: bold;"></p>
+                        <button class="btn btn-primary" onclick="nextQuizQuestion()" style="margin-top: 1rem;">
+                            다음 문제
+                        </button>
+                    </div>
+                </div>
+                <div id="quizComplete" style="display: none; text-align: center;">
+                    <h3 style="font-size: 2rem; margin-bottom: 1rem;">🎉 퀴즈 완료!</h3>
+                    <p style="font-size: 1.3rem; color: var(--primary-color); margin-bottom: 2rem;">
+                        점수: <span id="finalScore">0</span> / <span id="totalQuestions">0</span>
+                    </p>
+                    <button class="btn btn-primary" onclick="closeQuiz()">완료</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        let vocabulary = [];
+        let filteredVocab = [];
+        let quizWords = [];
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+
+        // 페이지 로드 시
+        loadUserProfile();
+        loadVocabulary();
+
+        async function loadVocabulary() {
+            try {
+                const response = await fetch('/api/vocabulary');
+                vocabulary = await response.json();
+                filteredVocab = vocabulary;
+                displayVocabulary();
+                updateStats();
+            } catch (error) {
+                console.error('단어장 로드 오류:', error);
+                document.getElementById('vocabList').innerHTML = 
+                    '<div class="error">단어장을 불러올 수 없습니다.</div>';
+            }
+        }
+
+        function displayVocabulary() {
+            const vocabList = document.getElementById('vocabList');
+            
+            if (filteredVocab.length === 0) {
+                vocabList.innerHTML = '<div class="empty">아직 추가한 단어가 없습니다.<br>책을 읽으면서 단어를 추가해보세요!</div>';
+                return;
+            }
+
+            vocabList.innerHTML = filteredVocab.map(vocab => `
+                <div class="vocab-card">
+                    <div class="vocab-word" onclick="speakText('${vocab.word}')" style="cursor: pointer;">
+                        🔊 ${vocab.word}
+                    </div>
+                    <div class="vocab-translation">${vocab.translation || '번역 없음'}</div>
+                    ${vocab.example_sentence ? `<div class="vocab-example">"${vocab.example_sentence}"</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('totalWords').textContent = vocabulary.length;
+            document.getElementById('learnedWords').textContent = vocabulary.filter(v => v.learned).length;
+        }
+
+        // 검색 기능
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            filteredVocab = vocabulary.filter(vocab => 
+                vocab.word.toLowerCase().includes(searchTerm) ||
+                (vocab.translation && vocab.translation.toLowerCase().includes(searchTerm))
+            );
+            displayVocabulary();
+        });
+
+        // 퀴즈 시작
+        function startQuiz() {
+            if (vocabulary.length < 4) {
+                showNotification('퀴즈를 시작하려면 최소 4개의 단어가 필요합니다.', 'error');
+                return;
+            }
+
+            // 랜덤으로 10개 단어 선택 (또는 전체)
+            quizWords = vocabulary.sort(() => Math.random() - 0.5).slice(0, Math.min(10, vocabulary.length));
+            currentQuizIndex = 0;
+            quizScore = 0;
+
+            document.getElementById('quizModal').style.display = 'flex';
+            document.getElementById('quizContent').style.display = 'block';
+            document.getElementById('quizComplete').style.display = 'none';
+            
+            showQuizQuestion();
+        }
+
+        function showQuizQuestion() {
+            if (currentQuizIndex >= quizWords.length) {
+                showQuizComplete();
+                return;
+            }
+
+            const currentWord = quizWords[currentQuizIndex];
+            document.getElementById('quizWord').textContent = currentWord.word;
+            
+            // 오답 선택지 생성 (다른 단어들의 번역)
+            const wrongAnswers = vocabulary
+                .filter(v => v.id !== currentWord.id && v.translation)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3)
+                .map(v => v.translation);
+            
+            // 정답과 섞기
+            const options = [currentWord.translation, ...wrongAnswers]
+                .sort(() => Math.random() - 0.5);
+            
+            const optionsHtml = options.map((option, index) => `
+                <button class="btn btn-secondary" onclick="checkAnswer('${option}', '${currentWord.translation}')" 
+                        style="font-size: 1.1rem; padding: 1rem;">
+                    ${option}
+                </button>
+            `).join('');
+            
+            document.getElementById('quizOptions').innerHTML = optionsHtml;
+            document.getElementById('quizResult').style.display = 'none';
+        }
+
+        function checkAnswer(selected, correct) {
+            const isCorrect = selected === correct;
+            
+            if (isCorrect) {
+                quizScore++;
+                document.getElementById('resultText').textContent = '✅ 정답입니다!';
+                document.getElementById('resultText').style.color = 'var(--secondary-color)';
+            } else {
+                document.getElementById('resultText').textContent = `❌ 오답입니다. 정답: ${correct}`;
+                document.getElementById('resultText').style.color = 'var(--danger-color)';
+            }
+            
+            document.getElementById('quizOptions').style.display = 'none';
+            document.getElementById('quizResult').style.display = 'block';
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            document.getElementById('quizOptions').style.display = 'flex';
+            showQuizQuestion();
+        }
+
+        function showQuizComplete() {
+            document.getElementById('quizContent').style.display = 'none';
+            document.getElementById('quizComplete').style.display = 'block';
+            document.getElementById('finalScore').textContent = quizScore;
+            document.getElementById('totalQuestions').textContent = quizWords.length;
+            
+            // 경험치 지급
+            const expGained = quizScore * 20;
+            updateReadingProgress(expGained / 10);
+            
+            showNotification(`🎉 퀴즈 완료! ${expGained} 경험치 획득!`, 'success');
+        }
+
+        function closeQuiz() {
+            document.getElementById('quizModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4F46E5">
+    <title>📖 책 읽기 - English Book Tutor</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <div class="header-content">
+                <a href="/library" class="back-btn">← 도서관</a>
+                <h1 class="page-title" id="bookTitle">책 읽기</h1>
+                <div class="level-badge small">
+                    <span class="level-text">Lv.<span id="userLevel">1</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="reader-container">
+            <!-- 컨트롤 버튼 -->
+            <div class="reader-controls">
+                <a href="/game/{{ book_id }}" class="control-btn" style="text-decoration: none; background: #4F46E5; color: white;">
+                    🎮 게임 모드
+                </a>
+                <button class="control-btn" onclick="toggleAutoRead()">
+                    <span id="autoReadIcon">▶️</span> 자동 읽기
+                </button>
+                <button class="control-btn" onclick="stopSpeech()">
+                    ⏹️ 정지
+                </button>
+                <button class="control-btn" onclick="changeSpeechRate(0.8)">
+                    🐢 느리게
+                </button>
+                <button class="control-btn" onclick="changeSpeechRate(1.0)">
+                    🚶 보통
+                </button>
+                <button class="control-btn" onclick="changeSpeechRate(1.3)">
+                    🏃 빠르게
+                </button>
+                <button class="control-btn" onclick="toggleTranslation()">
+                    🌐 번역 토글
+                </button>
+            </div>
+
+            <!-- 진도 표시 -->
+            <div class="progress-section" style="margin-bottom: 1.5rem;">
+                <div class="exp-bar-container">
+                    <div class="exp-bar">
+                        <div class="exp-fill" id="readingProgress" style="width: 0%; background: linear-gradient(90deg, #4F46E5, #7C3AED);"></div>
+                    </div>
+                    <div class="exp-text" id="progressText" style="color: #6B7280;">페이지 0 / 0</div>
+                </div>
+            </div>
+
+            <!-- 책 내용 -->
+            <div class="reading-content" id="readingContent">
+                <div class="loading">책을 불러오는 중...</div>
+            </div>
+
+            <!-- 번역 박스 -->
+            <div class="translation-box" id="translationBox" style="display: none;">
+                <h4 style="margin-bottom: 0.5rem;">📝 번역</h4>
+                <p id="translationText">문장을 클릭하면 번역이 표시됩니다.</p>
+                <button class="btn btn-secondary" onclick="addCurrentToVocab()" style="margin-top: 0.5rem; width: 100%;">
+                    📝 단어장에 추가
+                </button>
+            </div>
+
+            <!-- 페이지 네비게이션 -->
+            <div class="page-navigation" style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-secondary" onclick="previousPage()" id="prevBtn" style="flex: 1;">
+                    ← 이전 페이지
+                </button>
+                <button class="btn btn-primary" onclick="nextPage()" id="nextBtn" style="flex: 1;">
+                    다음 페이지 →
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        let currentBook = null;
+        let currentPage = 0;
+        let pages = [];
+        let isAutoReading = false;
+        let speechRate = 1.0;
+        let currentSentence = null;
+        let showTranslation = false;
+
+        // 페이지 로드 시
+        loadUserProfile();
+        loadBook();
+
+        async function loadBook() {
+            const bookId = {{ book_id }};
+            
+            try {
+                const response = await fetch(`/api/books/${bookId}`);
+                currentBook = await response.json();
+                
+                document.getElementById('bookTitle').textContent = currentBook.title;
+                
+                // 책 내용을 페이지로 분할 (1000자씩)
+                const content = currentBook.content;
+                const pageSize = 1000;
+                pages = [];
+                
+                for (let i = 0; i < content.length; i += pageSize) {
+                    pages.push(content.substring(i, i + pageSize));
+                }
+                
+                displayPage(0);
+                updateProgress();
+            } catch (error) {
+                console.error('책 로드 오류:', error);
+                document.getElementById('readingContent').innerHTML = 
+                    '<div class="error">책을 불러올 수 없습니다.</div>';
+            }
+        }
+
+        function displayPage(pageNum) {
+            if (pageNum < 0 || pageNum >= pages.length) return;
+            
+            currentPage = pageNum;
+            const content = pages[pageNum];
+            
+            // 문장 단위로 분리하여 표시
+            const sentences = splitIntoSentences(content);
+            const contentDiv = document.getElementById('readingContent');
+            
+            contentDiv.innerHTML = sentences.map((sentence, index) => {
+                const highlighted = highlightDifficultWords(sentence);
+                return `<span class="sentence" onclick="handleSentenceClick(${index})" data-sentence="${index}">${highlighted}</span>`;
+            }).join(' ');
+            
+            updateProgress();
+            
+            // 페이지를 읽었으므로 경험치 지급
+            if (pageNum > 0) {
+                updateReadingProgress(1);
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentPage + 1) / pages.length) * 100;
+            document.getElementById('readingProgress').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `페이지 ${currentPage + 1} / ${pages.length}`;
+            
+            // 버튼 활성화/비활성화
+            document.getElementById('prevBtn').disabled = currentPage === 0;
+            document.getElementById('nextBtn').disabled = currentPage === pages.length - 1;
+        }
+
+        function nextPage() {
+            if (currentPage < pages.length - 1) {
+                displayPage(currentPage + 1);
+                window.scrollTo(0, 0);
+            } else {
+                showNotification('🎉 책을 모두 읽으셨습니다!', 'success');
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 0) {
+                displayPage(currentPage - 1);
+                window.scrollTo(0, 0);
+            }
+        }
+
+        async function handleSentenceClick(index) {
+            const sentences = document.querySelectorAll('.sentence');
+            sentences.forEach(s => s.classList.remove('active'));
+            
+            const sentence = sentences[index];
+            sentence.classList.add('active');
+            
+            const text = sentence.textContent;
+            currentSentence = text;
+            
+            // 문장 읽기
+            speakText(text, speechRate);
+            
+            // 번역 표시
+            if (showTranslation) {
+                const translation = await translateText(text);
+                document.getElementById('translationText').textContent = translation;
+                document.getElementById('translationBox').style.display = 'block';
+            }
+        }
+
+        function toggleAutoRead() {
+            isAutoReading = !isAutoReading;
+            const icon = document.getElementById('autoReadIcon');
+            
+            if (isAutoReading) {
+                icon.textContent = '⏸️';
+                autoReadPage();
+            } else {
+                icon.textContent = '▶️';
+                stopSpeech();
+            }
+        }
+
+        function autoReadPage() {
+            if (!isAutoReading) return;
+            
+            const content = pages[currentPage];
+            speakText(content, speechRate);
+            
+            // 읽기가 끝나면 다음 페이지
+            currentUtterance.onend = () => {
+                if (isAutoReading && currentPage < pages.length - 1) {
+                    nextPage();
+                    setTimeout(autoReadPage, 1000);
+                } else {
+                    isAutoReading = false;
+                    document.getElementById('autoReadIcon').textContent = '▶️';
+                }
+            };
+        }
+
+        function changeSpeechRate(rate) {
+            speechRate = rate;
+            showNotification(`속도: ${rate === 0.8 ? '느리게' : rate === 1.0 ? '보통' : '빠르게'}`, 'success');
+        }
+
+        function toggleTranslation() {
+            showTranslation = !showTranslation;
+            
+            if (!showTranslation) {
+                document.getElementById('translationBox').style.display = 'none';
+            }
+            
+            showNotification(showTranslation ? '번역 표시 ON' : '번역 표시 OFF', 'success');
+        }
+
+        async function addCurrentToVocab() {
+            if (!currentSentence) {
+                showNotification('문장을 먼저 선택해주세요.', 'error');
+                return;
+            }
+            
+            // 선택된 단어 찾기
+            const word = prompt('단어장에 추가할 단어를 입력하세요:');
+            if (!word) return;
+            
+            const translation = await translateText(word);
+            await addToVocabulary(word, translation, currentSentence, currentBook.id);
+        }
+
+        // 키보드 단축키
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextPage();
+            if (e.key === 'ArrowLeft') previousPage();
+            if (e.key === ' ') {
+                e.preventDefault();
+                toggleAutoRead();
+            }
+        });
+    </script>
+</body>
+</html>
+

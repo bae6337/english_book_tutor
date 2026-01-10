@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4F46E5">
+    <title>📚 English Book Tutor</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">📚 English Tutor</h1>
+                <div class="user-info">
+                    <div class="level-badge">
+                        <span class="level-text">Lv.<span id="userLevel">1</span></span>
+                        <span class="points">⭐ <span id="userPoints">0</span>pt</span>
+                    </div>
+                </div>
+            </div>
+            <div class="exp-bar-container">
+                <div class="exp-bar" id="expBar">
+                    <div class="exp-fill" id="expFill" style="width: 0%"></div>
+                </div>
+                <div class="exp-text" id="expText">0 / 100 EXP</div>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <!-- 환영 섹션 -->
+            <section class="welcome-section">
+                <h2 class="welcome-title">반갑습니다, <span id="username">학습자</span>님! 👋</h2>
+                <p class="welcome-desc">영어 실력을 키우며 즐거운 독서를 시작해보세요!</p>
+            </section>
+
+            <!-- 오늘의 목표 -->
+            <section class="goals-section">
+                <h3 class="section-title">🎯 오늘의 목표</h3>
+                <div class="goals-list">
+                    <div class="goal-item">
+                        <span class="goal-icon">📖</span>
+                        <span class="goal-text">5페이지 읽기</span>
+                        <span class="goal-progress">3/5</span>
+                    </div>
+                    <div class="goal-item">
+                        <span class="goal-icon">📝</span>
+                        <span class="goal-text">10개 단어 학습</span>
+                        <span class="goal-progress">7/10</span>
+                    </div>
+                    <div class="goal-item completed">
+                        <span class="goal-icon">✅</span>
+                        <span class="goal-text">퀴즈 1회 완료</span>
+                        <span class="goal-progress">1/1</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 최근 획득 배지 -->
+            <section class="badges-section" id="badgesSection">
+                <h3 class="section-title">🏆 최근 획득 배지</h3>
+                <div class="badges-list" id="badgesList">
+                    <div class="badge-item">
+                        <span class="badge-icon">🌱</span>
+                        <span class="badge-name">첫 걸음</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 액션 버튼들 -->
+            <div class="action-buttons">
+                <a href="/game/practice" class="btn btn-primary btn-large" style="background: linear-gradient(135deg, #EC4899, #DB2777); box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);">
+                    🎮 영어 회화 게임 시작
+                </a>
+                <a href="/library" class="btn btn-primary btn-large">
+                    📚 책 선택하기
+                </a>
+                <a href="/vocabulary" class="btn btn-secondary btn-large">
+                    📝 나의 단어장
+                </a>
+            </div>
+
+            <!-- 통계 카드 -->
+            <section class="stats-section">
+                <h3 class="section-title">📊 나의 학습 통계</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-value" id="streakDays">0</div>
+                        <div class="stat-label">연속 학습일</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-value" id="booksRead">0</div>
+                        <div class="stat-label">완독한 책</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-value" id="vocabCount">0</div>
+                        <div class="stat-label">학습한 단어</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-value" id="quizScore">0</div>
+                        <div class="stat-label">평균 퀴즈 점수</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 하단 네비게이션 -->
+        <nav class="bottom-nav">
+            <a href="/" class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">홈</span>
+            </a>
+            <a href="/library" class="nav-item">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">도서관</span>
+            </a>
+            <a href="/vocabulary" class="nav-item">
+                <span class="nav-icon">📝</span>
+                <span class="nav-label">단어장</span>
+            </a>
+            <a href="#" class="nav-item" onclick="alert('준비중입니다!'); return false;">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">통계</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        // 페이지 로드 시 사용자 프로필 불러오기
+        loadUserProfile();
+    </script>
+</body>
+</html>
+

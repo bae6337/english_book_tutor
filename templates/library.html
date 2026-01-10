@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4F46E5">
+    <title>📚 도서관 - English Book Tutor</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <div class="header-content">
+                <a href="/" class="back-btn">← 뒤로</a>
+                <h1 class="page-title">📚 도서관</h1>
+                <div class="level-badge small">
+                    <span class="level-text">Lv.<span id="userLevel">1</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <!-- 난이도 필터 -->
+            <section class="filter-section">
+                <h3 class="section-title">난이도 선택</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-difficulty="all">전체</button>
+                    <button class="filter-btn" data-difficulty="beginner">초급 🌱</button>
+                    <button class="filter-btn" data-difficulty="intermediate">중급 📚</button>
+                    <button class="filter-btn" data-difficulty="advanced">고급 🎓</button>
+                </div>
+            </section>
+
+            <!-- 책 목록 -->
+            <section class="books-section">
+                <h3 class="section-title">인기 영어 원서</h3>
+                <div class="books-grid" id="booksList">
+                    <!-- 책 카드들이 여기에 동적으로 추가됩니다 -->
+                    <div class="loading">책 목록을 불러오는 중...</div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 하단 네비게이션 -->
+        <nav class="bottom-nav">
+            <a href="/" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">홈</span>
+            </a>
+            <a href="/library" class="nav-item active">
+                <span class="nav-icon">📚</span>
+                <span class="nav-label">도서관</span>
+            </a>
+            <a href="/vocabulary" class="nav-item">
+                <span class="nav-icon">📝</span>
+                <span class="nav-label">단어장</span>
+            </a>
+            <a href="#" class="nav-item" onclick="alert('준비중입니다!'); return false;">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">통계</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- 책 상세 모달 -->
+    <div class="modal" id="bookModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">책 제목</h3>
+                <button class="modal-close" onclick="closeBookModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <img id="modalCover" src="" alt="책 표지" class="modal-cover">
+                <p class="modal-author">저자: <span id="modalAuthor"></span></p>
+                <p class="modal-difficulty">난이도: <span id="modalDifficulty"></span></p>
+                <p class="modal-description" id="modalDescription"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBookModal()">취소</button>
+                <button class="btn btn-primary" id="downloadBtn" onclick="downloadAndReadBook()">
+                    📥 다운로드 후 읽기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        let currentBook = null;
+        let currentFilter = 'all';
+
+        // 페이지 로드 시
+        loadUserProfile();
+        loadBooks();
+
+        // 책 목록 불러오기
+        async function loadBooks() {
+            try {
+                const response = await fetch('/api/books');
+                const books = await response.json();
+                displayBooks(books);
+            } catch (error) {
+                console.error('책 목록 로드 오류:', error);
+                document.getElementById('booksList').innerHTML = 
+                    '<div class="error">책 목록을 불러올 수 없습니다.</div>';
+            }
+        }
+
+        // 책 목록 표시
+        function displayBooks(books) {
+            const filteredBooks = currentFilter === 'all' 
+                ? books 
+                : books.filter(book => book.difficulty === currentFilter);
+
+            const booksList = document.getElementById('booksList');
+            
+            if (filteredBooks.length === 0) {
+                booksList.innerHTML = '<div class="empty">해당 난이도의 책이 없습니다.</div>';
+                return;
+            }
+
+            booksList.innerHTML = filteredBooks.map(book => {
+                const difficultyEmoji = {
+                    'beginner': '🌱',
+                    'intermediate': '📚',
+                    'advanced': '🎓'
+                }[book.difficulty] || '📖';
+                
+                const downloadedBadge = book.is_downloaded 
+                    ? '<span class="downloaded-badge" style="background:#10B981; color:white; padding:0.2rem 0.5rem; border-radius:12px; font-size:0.7rem; margin-left:0.5rem;">✅ 보유 중</span>' 
+                    : '';
+
+                return `
+                    <div class="book-card" onclick="showBookModal(${JSON.stringify(book).replace(/"/g, '&quot;')})">
+                        <div class="book-cover">
+                            <img src="${book.cover_url}" alt="${book.title}" onerror="this.src='https://via.placeholder.com/150x200?text=Book'">
+                        </div>
+                        <div class="book-info">
+                            <h4 class="book-title">${book.title}</h4>
+                            <p class="book-author">${book.author}</p>
+                            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.2rem;">
+                                <span class="book-difficulty ${book.difficulty}">
+                                    ${difficultyEmoji} ${getDifficultyText(book.difficulty)}
+                                </span>
+                                ${downloadedBadge}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 난이도 텍스트 변환
+        function getDifficultyText(difficulty) {
+            const texts = {
+                'beginner': '초급',
+                'intermediate': '중급',
+                'advanced': '고급'
+            };
+            return texts[difficulty] || '일반';
+        }
+
+        // 필터 버튼 이벤트
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.difficulty;
+                await loadBooks();
+            });
+        });
+
+        // 책 상세 모달 표시
+        function showBookModal(book) {
+            currentBook = book;
+            document.getElementById('modalTitle').textContent = book.title;
+            document.getElementById('modalAuthor').textContent = book.author;
+            document.getElementById('modalDifficulty').textContent = getDifficultyText(book.difficulty);
+            document.getElementById('modalDescription').textContent = book.description;
+            document.getElementById('modalCover').src = book.cover_url;
+            document.getElementById('bookModal').style.display = 'flex';
+        }
+
+        // 모달 닫기
+        function closeBookModal() {
+            document.getElementById('bookModal').style.display = 'none';
+        }
+
+        // 책 다운로드 및 읽기
+        async function downloadAndReadBook() {
+            if (!currentBook) return;
+
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = '📥 다운로드 중...';
+
+            try {
+                // 이미 다운로드된 책인지 확인
+                if (currentBook.id) {
+                    window.location.href = `/reader/${currentBook.id}`;
+                    return;
+                }
+
+                // 책 다운로드
+                const response = await fetch('/api/books/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        gutenberg_id: currentBook.gutenberg_id
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('📚 책이 다운로드되었습니다!', 'success');
+                    setTimeout(() => {
+                        window.location.href = `/reader/${result.book_id}`;
+                    }, 500);
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('다운로드 오류:', error);
+                showNotification('❌ 책을 다운로드할 수 없습니다.', 'error');
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = '📥 다시 시도';
+            }
+        }
+    </script>
+</body>
+</html>
+
