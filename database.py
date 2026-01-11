@@ -337,15 +337,22 @@ class Database:
         conn.close()
         return True
 
-    def get_random_practice_sentences(self, limit=10):
+    def get_random_practice_sentences(self, limit=10, difficulty=None):
         """회화 연습 문장 랜덤 추출"""
         conn = self.get_connection()
         cursor = conn.cursor()
         
-        cursor.execute(f'''
-            SELECT english, korean FROM practice_sentences 
-            ORDER BY RANDOM() LIMIT ?
-        ''', (limit,))
+        if difficulty:
+            cursor.execute('''
+                SELECT english, korean FROM practice_sentences 
+                WHERE difficulty = ?
+                ORDER BY RANDOM() LIMIT ?
+            ''', (difficulty, limit))
+        else:
+            cursor.execute('''
+                SELECT english, korean FROM practice_sentences 
+                ORDER BY RANDOM() LIMIT ?
+            ''', (limit,))
         
         sentences = [dict(row) for row in cursor.fetchall()]
         conn.close()
