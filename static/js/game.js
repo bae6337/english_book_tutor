@@ -34,7 +34,7 @@ let recognition = null; // 음성 인식 객체
 const player = {
     x: 0, y: 0, width: 70, height: 70,
     color: '#FCD34D',
-    paddleWidth: 100, paddleHeight: 15 
+    paddleWidth: 200, paddleHeight: 15 // 바 크기 2배 (100 -> 200)
 };
 
 let balls = [];
@@ -126,6 +126,7 @@ function stopAudio() {
     window.speechSynthesis.cancel();
     isSpeaking = false;
     audioQueue = [];
+    if (bonusAudioTimeout) clearTimeout(bonusAudioTimeout);
     if (recognition) recognition.stop();
 }
 
@@ -515,8 +516,14 @@ function showMicIcon(show) {
     }
 }
 
+// ============================
+// 보너스 스테이지 상태
+// ============================
+let bonusSentences = [];
+let currentBonusLevel = 0;
+
 function finishReview(completedSent) {
-    if (completedSentencesCount >= 10) {
+    if (completedSentencesCount >= 2) { // 2문장 후 보너스 스테이지 (테스트용)
         startBonusStage();
         return;
     }
@@ -539,39 +546,127 @@ function finishReview(completedSent) {
 }
 
 // ============================
-// 보너스 모드 (공 부활)
+// 보너스 모드 (벽돌깨기 - 단어 순서 클리어)
 // ============================
+let bonusAudioTimeout = null;
+
 function startBonusStage() {
     gameState = 'BONUS';
     stopAudio();
     enemies = []; 
     balls = [];
-    activeSentences = [];
+    particles = [];
     
-    sentenceDisplay.style.display = 'none';
+    sentenceDisplay.style.display = 'block';
     createExplosion(canvas.width/2, canvas.height/2, '#FCD34D');
     
-    // 벽돌 생성
-    const bonusWords = ["BONUS", "TIME", "HIT", "THE", "WORDS", "SCORE", "UP", "YEAH!"];
-    const rows = 4; const cols = 4;
-    const blockWidth = 100; const blockHeight = 40; const padding = 20;
+    // 테스트용: 다음 2개 문장 복사
+    bonusSentences = allSentences.slice(0, 2);
+    
+    if (bonusSentences.length === 0) {
+        endBonusStage();
+        return;
+    }
+
+    currentBonusLevel = 0;
+    setupBonusLevel(currentBonusLevel);
+    
+    if (animationId) cancelAnimationFrame(animationId);
+    gameLoop();
+}
+
+function setupBonusLevel(levelIdx) {
+    if (levelIdx >= bonusSentences.length) {
+        endBonusStage(); // 모든 보너스 레벨 완료
+        return;
+    }
+    
+    currentBonusLevel = levelIdx;
+    enemies = [];
+    balls = [];
+    
+    const sentText = bonusSentences[levelIdx];
+    const words = sentText.replace(/[.!?]/g, '').split(/\s+/);
+    
+    // 빈칸 2개 선정 (단어 수 부족하면 전체)
+    const count = Math.min(words.length, 2);
+    const indices = Array.from({length: words.length}, (_, i) => i).sort(() => Math.random() - 0.5);
+    const blanks = indices.slice(0, count).sort((a,b) => a-b);
+    
+    // UI용 문장 데이터 설정
+    activeSentences = [{
+        fullText: sentText,
+        words: words,
+        blanks: blanks,
+        filled: [],
+        translation: null,
+        isCompleted: false
+    }];
+    updateSentenceUI();
+    
+    // [신규] 보너스 오디오 루프 시작
+    if (bonusAudioTimeout) clearTimeout(bonusAudioTimeout);
+    playBonusSentenceAudio();
+    
+    // 벽돌 데이터 생성
+    // 1. 타겟 단어 (각 빈칸 단어마다 3개씩)
+    const targets = [];
+    blanks.forEach(wordIdx => {
+        const word = words[wordIdx];
+        for(let k=0; k<3; k++) {
+            targets.push({ text: word, wordIdx: wordIdx, isTarget: true });
+        }
+    });
+    
+    // 2. 나머지 빈 벽돌 (5행 6열 = 30개)
+    const rows = 5; const cols = 6;
+    const totalSlots = rows * cols;
+    const brickData = [...targets];
+    
+    while(brickData.length < totalSlots) {
+        brickData.push({ text: "", wordIdx: -1, isTarget: false });
+    }
+    
+    brickData.sort(() => Math.random() - 0.5);
+    
+    // 배치
+    const blockWidth = 80; const blockHeight = 35; const padding = 10;
     const startX = (canvas.width - (cols * (blockWidth + padding))) / 2 + padding/2;
     
+    let bIdx = 0;
     for(let r=0; r<rows; r++) {
         for(let c=0; c<cols; c++) {
+            if(bIdx >= brickData.length) break;
+            const d = brickData[bIdx++];
             enemies.push({
-                text: bonusWords[(r*cols+c) % bonusWords.length],
                 x: startX + c * (blockWidth + padding),
                 y: 100 + r * (blockHeight + padding),
                 width: blockWidth, height: blockHeight,
-                color: `hsl(${Math.random()*360}, 70%, 60%)`,
-                isBonusBrick: true
+                text: d.text,
+                wordIdx: d.wordIdx,
+                isTarget: d.isTarget,
+                // 타겟이면 빨강(1번 빈칸) / 파랑(2번 빈칸), 아니면 회색
+                color: d.isTarget ? (blanks.indexOf(d.wordIdx) === 0 ? '#F87171' : '#60A5FA') : '#4B5563'
             });
         }
     }
     
     spawnBall();
-    requestAnimationFrame(gameLoop);
+}
+
+function playBonusSentenceAudio() {
+    if (gameState !== 'BONUS' || activeSentences.length === 0) return;
+    
+    // 큐 비우고 현재 문장 재생
+    // stopAudio()를 호출하면 synthesis가 취소되므로, 여기서는 큐만 관리하거나 직접 재생
+    // 기존 queueAudio 활용
+    
+    const text = activeSentences[0].fullText;
+    queueAudio(text, 'en-US', () => {
+        if (gameState === 'BONUS') {
+            bonusAudioTimeout = setTimeout(playBonusSentenceAudio, 2000); // 2초 후 반복
+        }
+    });
 }
 
 function spawnBall() {
@@ -612,22 +707,72 @@ function updateBonusGame() {
             if (ball.x > b.x && ball.x < b.x + b.width &&
                 ball.y > b.y && ball.y < b.y + b.height) {
                 ball.dy *= -1;
-                enemies.splice(i, 1);
-                score += 200;
-                scoreElement.textContent = score;
-                createExplosion(b.x + b.width/2, b.y + b.height/2, b.color);
+                
+                // [수정] 벽돌 깨기 로직
+                let destroy = false;
+                
+                if (!b.isTarget) {
+                    // 빈 벽돌은 언제나 파괴 가능
+                    destroy = true;
+                } else {
+                    // 단어 벽돌: 현재 문장의 '순서'에 맞는 빈칸 단어인가?
+                    // activeSentences[0] 하나만 사용
+                    const sent = activeSentences[0];
+                    if (sent) {
+                        // 현재 채워야 할 빈칸 인덱스 찾기
+                        // blanks 배열은 이미 정렬되어 있음 (앞쪽 빈칸부터)
+                        // filled에 없는 첫번째 blank 찾기
+                        const nextBlankIdx = sent.blanks.find(idx => !sent.filled.includes(idx));
+                        
+                        if (b.wordIdx === nextBlankIdx) {
+                            destroy = true;
+                        } else {
+                            // 순서가 아니면 파괴 불가
+                            destroy = false;
+                            createExplosion(b.x + b.width/2, b.y + b.height/2, '#555'); 
+                        }
+                    }
+                }
+
+                if (destroy) {
+                    enemies.splice(i, 1);
+                    score += 200;
+                    scoreElement.textContent = score;
+                    createExplosion(b.x + b.width/2, b.y + b.height/2, b.color);
+                    
+                    if (b.isTarget) {
+                        const sent = activeSentences[0];
+                        
+                        // [수정] 3개 중 하나만 맞춰도 해당 단어 클리어 처리
+                        if (!sent.filled.includes(b.wordIdx)) {
+                            sent.filled.push(b.wordIdx);
+                            updateSentenceUI();
+                        }
+                        
+                        // 모든 빈칸 채웠는지 확인 -> 다음 레벨
+                        // (UI상 채워졌으면 실제 벽돌이 남아있어도 통과)
+                        if (sent.filled.length === sent.blanks.length) {
+                            if (bonusAudioTimeout) clearTimeout(bonusAudioTimeout);
+                            setTimeout(() => {
+                                setupBonusLevel(currentBonusLevel + 1);
+                            }, 500);
+                        }
+                    }
+                }
                 break; 
             }
         }
     }
     
-    if (enemies.length === 0) {
-        setTimeout(endBonusStage, 1000);
+    // 타겟 벽돌이 모두 사라지면 종료 (빈 벽돌은 남아있어도 됨)
+    if (!enemies.some(e => e.isTarget)) {
+        // 이미 위에서 처리함
     }
 }
 
 function endBonusStage() {
     if (gameState !== 'BONUS') return;
+    if (bonusAudioTimeout) clearTimeout(bonusAudioTimeout);
     completedSentencesCount = 0;
     comboElement.textContent = 0;
     gameState = 'PLAYING';
