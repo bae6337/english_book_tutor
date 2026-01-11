@@ -269,7 +269,7 @@ function gameLoop() {
     drawStars();
 
     if (gameState === 'PLAYING') {
-        updateEnemies();
+        updateEnemies(); 
         checkCollisions();
         drawPlayer(); 
     } else if (gameState === 'BONUS') {
@@ -277,8 +277,7 @@ function gameLoop() {
         drawPaddle(); 
         drawBalls();
     } else if (gameState === 'REVIEW' || gameState === 'SPEAKING') {
-        // 복습/말하기 중에는 배경만 그림
-        // drawPlayer(); // 필요 시 그리기
+        // [중요] 말하기/복습 중에는 적(단어)을 업데이트하지 않음 (멈춤)
     }
     
     updateParticles();
@@ -399,6 +398,9 @@ function startSpeakingChallenge(sent) {
         return;
     }
     
+    // [중요] 이미 말하기 상태라면 중복 실행 방지
+    if (gameState === 'SPEAKING') return;
+
     // 상태 변경 (입력 차단)
     gameState = 'SPEAKING';
     
@@ -429,18 +431,24 @@ function startSpeakingChallenge(sent) {
             
             if (speechTimeout) clearTimeout(speechTimeout);
             
+            // [수정] 피드백 확실하게 주기 (화면만, 소리 X)
             if (success) {
-                micStatus.innerHTML = '🎉 Good Job!';
+                micStatus.innerHTML = '<div style="font-size:3rem;">🎉</div><div style="font-size:2rem; color:#10B981;">Good Job!</div>';
                 micStatus.style.borderColor = '#10B981';
+                micStatus.style.background = 'rgba(0, 50, 0, 0.9)';
+                
                 setTimeout(() => {
                     if(document.body.contains(micStatus)) document.body.removeChild(micStatus);
                     finishReview(sent);
-                }, 1500);
+                }, 1500); 
             } else {
-                micStatus.innerHTML = '👂 Try Again...';
+                micStatus.innerHTML = '<div style="font-size:3rem;">👂</div><div style="font-size:2rem; color:#F59E0B;">Try Again...</div>';
+                micStatus.style.borderColor = '#F59E0B';
+                
                 setTimeout(() => {
                     if(document.body.contains(micStatus)) document.body.removeChild(micStatus);
-                    // 다시 시도 (재귀 호출)
+                    // 다시 시도 (재귀 호출 - 상태 초기화 후)
+                    gameState = 'REVIEW'; 
                     startSpeakingChallenge(sent);
                 }, 1500);
             }
@@ -474,15 +482,8 @@ function startSpeakingChallenge(sent) {
         };
         
         recognition.onend = () => {
-            // 결과 없이 끝났으면(침묵 등) 재시도
-            if (recognitionActive) {
-                console.log('Speech ended without result');
-                if(document.body.contains(micStatus)) document.body.removeChild(micStatus);
-                
-                // [수정] 즉시 재시작하지 않고 finishReview 호출 (무한루프/오류 방지)
-                // 사용자가 아무 말 안 하면 그냥 통과 처리
-                finishReview(sent);
-            }
+            // 결과 없이 끝났으면(침묵 등) 처리
+            // 여기서는 아무것도 안 하고 타임아웃에 맡김
         };
         
         // 시작
@@ -495,8 +496,8 @@ function startSpeakingChallenge(sent) {
                 if (recognitionActive) {
                     recognition.stop();
                     console.log('Speech timeout');
-                    if(document.body.contains(micStatus)) document.body.removeChild(micStatus);
-                    finishReview(sent);
+                    // 타임아웃 시 실패 처리 (재시도 유도)
+                    handleResult(false);
                 }
             }, 5000);
             
