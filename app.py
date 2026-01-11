@@ -82,8 +82,11 @@ import csv
 
 # DB에 문장 데이터 초기화 (CSV 파일이 있으면 로드)
 def init_practice_sentences():
-    # CSV 파일 경로
-    csv_path = os.path.join('data', 'english_conversation_sentences_100x3.csv')
+    # CSV 파일 목록
+    csv_files = [
+        'english_conversation_sentences_100x3.csv',
+        'english_conversation_sentences_1000_each_with_ko.csv'
+    ]
     
     # [수정] 무조건 테이블을 비우고 다시 로드 (개발 중 데이터 꼬임 방지)
     try:
@@ -96,36 +99,43 @@ def init_practice_sentences():
     except:
         pass
 
-    if os.path.exists(csv_path):
-        print(f"CSV 파일 발견: {csv_path}")
-        try:
-            with open(csv_path, 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                count = 0
-                for row in reader:
-                    # CSV 컬럼: Level, No, Sentence
-                    # DB 컬럼: english, korean (번역 필요)
-                    if 'Sentence' in row:
-                        english = row['Sentence']
-                        level_str = row.get('Level', 'Beginner')
+    total_loaded = 0
+    
+    for filename in csv_files:
+        csv_path = os.path.join('data', filename)
+        if os.path.exists(csv_path):
+            print(f"CSV 파일 발견: {csv_path}")
+            try:
+                with open(csv_path, 'r', encoding='utf-8') as f:
+                    reader = csv.DictReader(f)
+                    count = 0
+                    for row in reader:
+                        # CSV 컬럼: Level, No, Sentence/English, Korean
+                        english = ""
+                        korean = ""
                         
-                        # 난이도 변환
-                        difficulty = 1
-                        if level_str == 'Intermediate': difficulty = 2
-                        elif level_str == 'Advanced': difficulty = 3
+                        if 'Sentence' in row: english = row['Sentence']
+                        elif 'English' in row: english = row['English']
                         
-                        # 한국어 번역은 없으므로 API로 채우거나 공란으로 둠
-                        # 여기서는 일단 공란으로 두고, 게임 실행 시 번역되도록 함
-                        # 또는 "번역 필요"라고 표시
-                        korean = "" 
+                        if 'Korean' in row: korean = row['Korean']
                         
-                        # DB에 추가
-                        if db.add_practice_sentence(english, korean, level_str, difficulty):
-                            count += 1
-                print(f"CSV 파일에서 {count}개 문장 로드 완료!")
-        except Exception as e:
-            print(f"CSV 파일 로드 중 오류: {e}")
-    else:
+                        if english:
+                            level_str = row.get('Level', 'Beginner')
+                            
+                            # 난이도 변환
+                            difficulty = 1
+                            if level_str == 'Intermediate': difficulty = 2
+                            elif level_str == 'Advanced': difficulty = 3
+                            
+                            # DB에 추가
+                            if db.add_practice_sentence(english, korean, level_str, difficulty):
+                                count += 1
+                    print(f"{filename}에서 {count}개 문장 로드 완료!")
+                    total_loaded += count
+            except Exception as e:
+                print(f"{filename} 로드 중 오류: {e}")
+
+    if total_loaded == 0:
         # CSV 없으면 기본 데이터 사용
         count = db.get_practice_sentences_count()
         if count == 0:
@@ -133,6 +143,8 @@ def init_practice_sentences():
             for item in INITIAL_SENTENCES:
                 db.add_practice_sentence(item['en'], item['ko'], item['cat'])
             print("회화 문장 초기화 완료!")
+    else:
+         print(f"총 {total_loaded}개의 문장이 준비되었습니다.")
 
 # 앱 시작 시 초기화 실행
 with app.app_context():
