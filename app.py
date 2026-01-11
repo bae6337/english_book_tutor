@@ -84,8 +84,7 @@ import csv
 def init_practice_sentences():
     # CSV 파일 목록
     csv_files = [
-        'english_conversation_sentences_100x3.csv',
-        'english_conversation_sentences_1000_each_with_ko.csv'
+        'english_conversation_sentences_100x3.csv'
     ]
     
     # [수정] 무조건 테이블을 비우고 다시 로드 (개발 중 데이터 꼬임 방지)
