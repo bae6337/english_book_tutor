@@ -24,6 +24,7 @@ let particles = [];
 let time = 0;
 let globalSpeedMultiplier = parseFloat(speedSlider.value); 
 let speechStrictness = parseFloat(strictSlider ? strictSlider.value : 0.3);
+let recentCompletedSentences = []; // [신규] 최근 완료한 문장 저장용
 
 // 오디오 & 음성인식
 let isSpeaking = false;
@@ -380,6 +381,9 @@ function completeSentence(sent) {
     completedSentencesCount++;
     comboElement.textContent = completedSentencesCount;
     
+    // [신규] 완료된 문장 기록 (보너스 게임용)
+    recentCompletedSentences.push(sent.fullText);
+    
     gameState = 'REVIEW';
     stopAudio();
     updateSentenceUI();
@@ -523,11 +527,7 @@ let bonusSentences = [];
 let currentBonusLevel = 0;
 
 function finishReview(completedSent) {
-    if (completedSentencesCount >= 2) { // 2문장 후 보너스 스테이지 (테스트용)
-        startBonusStage();
-        return;
-    }
-
+    // [수정] 완료된 문장을 먼저 제거 (보너스 게임 진입 전 정리)
     const idx = activeSentences.indexOf(completedSent);
     if (idx > -1) {
         activeSentences.splice(idx, 1);
@@ -538,6 +538,11 @@ function finishReview(completedSent) {
             }
         });
         enemies = enemies.filter(e => e.sentIndex !== -1);
+    }
+
+    if (completedSentencesCount >= 2) { // 2문장 후 보너스 스테이지
+        startBonusStage();
+        return;
     }
     
     // 오디오 정리 후 다음 라운드 시작
@@ -560,8 +565,18 @@ function startBonusStage() {
     sentenceDisplay.style.display = 'block';
     createExplosion(canvas.width/2, canvas.height/2, '#FCD34D');
     
-    // 테스트용: 다음 2개 문장 복사
-    bonusSentences = allSentences.slice(0, 2);
+    // [수정] 방금 완료한 문장들 중 1개를 랜덤 선택
+    bonusSentences = [];
+    if (recentCompletedSentences.length > 0) {
+        const randomIndex = Math.floor(Math.random() * recentCompletedSentences.length);
+        bonusSentences = [recentCompletedSentences[randomIndex]];
+    } else {
+        // 혹시 모를 예외 처리 (기본 문장)
+        bonusSentences = ["Practice makes perfect."];
+    }
+    
+    // 사용했으므로 초기화
+    recentCompletedSentences = [];
     
     if (bonusSentences.length === 0) {
         endBonusStage();
@@ -605,8 +620,15 @@ function setupBonusLevel(levelIdx) {
     updateSentenceUI();
     
     // [신규] 보너스 오디오 루프 시작
+    // 기존 오디오 중단 후 새 문장 재생
     if (bonusAudioTimeout) clearTimeout(bonusAudioTimeout);
-    playBonusSentenceAudio();
+    window.speechSynthesis.cancel(); // 이전 소리 즉시 끄기
+    audioQueue = []; // 큐 비우기
+    isSpeaking = false;
+    
+    setTimeout(() => {
+        playBonusSentenceAudio();
+    }, 500); // 0.5초 딜레이 후 재생 (안정성 확보)
     
     // 벽돌 데이터 생성
     // 1. 타겟 단어 (각 빈칸 단어마다 3개씩)
@@ -655,16 +677,20 @@ function setupBonusLevel(levelIdx) {
 }
 
 function playBonusSentenceAudio() {
-    if (gameState !== 'BONUS' || activeSentences.length === 0) return;
+    // [수정] 게임 상태 확인 및 문장 데이터 유효성 검사 강화
+    if (gameState !== 'BONUS') return;
+    if (activeSentences.length === 0 || !activeSentences[0].fullText) return;
     
-    // 큐 비우고 현재 문장 재생
-    // stopAudio()를 호출하면 synthesis가 취소되므로, 여기서는 큐만 관리하거나 직접 재생
-    // 기존 queueAudio 활용
-    
+    // 현재 화면에 표시된 문장 텍스트 가져오기
     const text = activeSentences[0].fullText;
+    
+    // 기존 오디오 큐 비우기 (소리 겹침 방지)
+    // audioQueue = []; // queueAudio 내부 로직에 맡김
+    
     queueAudio(text, 'en-US', () => {
-        if (gameState === 'BONUS') {
-            bonusAudioTimeout = setTimeout(playBonusSentenceAudio, 2000); // 2초 후 반복
+        // 재생이 끝난 후, 아직도 보너스 게임 중이고 문장이 그대로라면 반복 재생
+        if (gameState === 'BONUS' && activeSentences.length > 0 && activeSentences[0].fullText === text) {
+            bonusAudioTimeout = setTimeout(playBonusSentenceAudio, 2000); 
         }
     });
 }
