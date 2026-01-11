@@ -117,6 +117,17 @@ class Database:
                 FOREIGN KEY (book_id) REFERENCES books (id)
             )
         ''')
+
+        # 회화 문장 테이블
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS practice_sentences (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                english TEXT NOT NULL,
+                korean TEXT NOT NULL,
+                category TEXT DEFAULT 'general',
+                difficulty INTEGER DEFAULT 1
+            )
+        ''')
         
         # 기본 사용자 생성
         cursor.execute('SELECT COUNT(*) as count FROM user_profile')
@@ -305,4 +316,47 @@ class Database:
         
         conn.close()
         return False
+
+    def add_practice_sentence(self, english, korean, category='general', difficulty=1):
+        """회화 연습 문장 추가"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        # 중복 확인
+        cursor.execute('SELECT id FROM practice_sentences WHERE english = ?', (english,))
+        if cursor.fetchone():
+            conn.close()
+            return False
+            
+        cursor.execute('''
+            INSERT INTO practice_sentences (english, korean, category, difficulty)
+            VALUES (?, ?, ?, ?)
+        ''', (english, korean, category, difficulty))
+        
+        conn.commit()
+        conn.close()
+        return True
+
+    def get_random_practice_sentences(self, limit=10):
+        """회화 연습 문장 랜덤 추출"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute(f'''
+            SELECT english, korean FROM practice_sentences 
+            ORDER BY RANDOM() LIMIT ?
+        ''', (limit,))
+        
+        sentences = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return sentences
+
+    def get_practice_sentences_count(self):
+        """전체 회화 문장 수 조회"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) as count FROM practice_sentences')
+        count = cursor.fetchone()['count']
+        conn.close()
+        return count
 

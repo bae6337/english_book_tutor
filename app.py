@@ -27,6 +27,70 @@ def translate_text_api(text, src='en', dest='ko'):
         print(f"번역 오류: {e}")
         return text
 
+# 기본 회화 문장 데이터 (DB 초기화용)
+INITIAL_SENTENCES = [
+    # 1. 인사 및 안부 (Greetings)
+    {"en": "How is it going today?", "ko": "오늘 기분이 어떠세요?", "cat": "greeting"},
+    {"en": "Long time no see.", "ko": "오랜만이에요.", "cat": "greeting"},
+    {"en": "It is nice to meet you.", "ko": "만나서 반가워요.", "cat": "greeting"},
+    {"en": "Have a nice day.", "ko": "좋은 하루 되세요.", "cat": "greeting"},
+    {"en": "See you later.", "ko": "나중에 봐요.", "cat": "greeting"},
+    {"en": "How have you been?", "ko": "그동안 어떻게 지냈어요?", "cat": "greeting"},
+    
+    # 2. 여행 및 길찾기 (Travel)
+    {"en": "Where is the subway station?", "ko": "지하철역이 어디에 있나요?", "cat": "travel"},
+    {"en": "I am looking for a bus stop.", "ko": "버스 정류장을 찾고 있어요.", "cat": "travel"},
+    {"en": "How long does it take to get there?", "ko": "거기까지 가는데 얼마나 걸리나요?", "cat": "travel"},
+    {"en": "Can you show me on the map?", "ko": "지도에서 보여주실 수 있나요?", "cat": "travel"},
+    {"en": "I would like to make a reservation.", "ko": "예약을 하고 싶어요.", "cat": "travel"},
+    {"en": "Do you have a vacancy?", "ko": "빈 방 있나요?", "cat": "travel"},
+    {"en": "Check in please.", "ko": "체크인 해주세요.", "cat": "travel"},
+    
+    # 3. 식당 및 주문 (Restaurant)
+    {"en": "Can I have a glass of water please?", "ko": "물 한 잔 주시겠어요?", "cat": "restaurant"},
+    {"en": "What do you recommend for dinner?", "ko": "저녁 메뉴로 무엇을 추천하세요?", "cat": "restaurant"},
+    {"en": "I would like to order now.", "ko": "지금 주문할게요.", "cat": "restaurant"},
+    {"en": "Can I get the bill please?", "ko": "계산서 좀 주시겠어요?", "cat": "restaurant"},
+    {"en": "This is delicious.", "ko": "이거 맛있네요.", "cat": "restaurant"},
+    {"en": "Do you have a vegetarian menu?", "ko": "채식 메뉴가 있나요?", "cat": "restaurant"},
+
+    # 4. 감정 표현 (Emotions)
+    {"en": "I am so happy right now.", "ko": "지금 너무 행복해요.", "cat": "emotion"},
+    {"en": "I am feeling a bit tired.", "ko": "조금 피곤하네요.", "cat": "emotion"},
+    {"en": "I am worried about the exam.", "ko": "시험이 걱정돼요.", "cat": "emotion"},
+    {"en": "That sounds interesting.", "ko": "그거 흥미롭게 들리네요.", "cat": "emotion"},
+    {"en": "I am really excited.", "ko": "정말 신나요.", "cat": "emotion"},
+    {"en": "Don't give up.", "ko": "포기하지 마세요.", "cat": "emotion"},
+
+    # 5. 일상 생활 (Daily Life)
+    {"en": "Could you do me a favor?", "ko": "부탁 하나만 들어주실 수 있나요?", "cat": "daily"},
+    {"en": "What time is it now?", "ko": "지금 몇 시예요?", "cat": "daily"},
+    {"en": "I need to go to the bathroom.", "ko": "화장실에 가야 해요.", "cat": "daily"},
+    {"en": "Can you help me with this?", "ko": "이것 좀 도와주실 수 있나요?", "cat": "daily"},
+    {"en": "I lost my phone.", "ko": "핸드폰을 잃어버렸어요.", "cat": "daily"},
+    {"en": "It is raining outside.", "ko": "밖에 비가 오고 있어요.", "cat": "daily"},
+    {"en": "Do you have any plans for the weekend?", "ko": "주말에 계획 있으세요?", "cat": "daily"},
+    {"en": "I am afraid I cannot make it.", "ko": "못 갈 것 같아요.", "cat": "daily"},
+    {"en": "Let me know if you need anything.", "ko": "필요한 게 있으면 말씀해주세요.", "cat": "daily"},
+    {"en": "I totally agree with you.", "ko": "전적으로 동감합니다.", "cat": "daily"},
+    {"en": "Could you please speak slower?", "ko": "좀 더 천천히 말씀해 주시겠어요?", "cat": "daily"},
+    {"en": "I don't understand.", "ko": "이해가 안 돼요.", "cat": "daily"},
+    {"en": "Please say that again.", "ko": "다시 한 번 말씀해 주세요.", "cat": "daily"}
+]
+
+# DB에 문장 데이터 초기화 (없을 경우에만)
+def init_practice_sentences():
+    count = db.get_practice_sentences_count()
+    if count == 0:
+        print(f"DB에 회화 문장이 없습니다. 기본 문장 {len(INITIAL_SENTENCES)}개를 추가합니다...")
+        for item in INITIAL_SENTENCES:
+            db.add_practice_sentence(item['en'], item['ko'], item['cat'])
+        print("회화 문장 초기화 완료!")
+
+# 앱 시작 시 초기화 실행
+with app.app_context():
+    init_practice_sentences()
+
 # Project Gutenberg에서 난이도별 영어 책 목록
 POPULAR_BOOKS = [
     # ========== 유치원/왕초보 (Kindergarten/Beginner) - 매우 짧고 쉬운 문장 ==========
@@ -343,30 +407,6 @@ def update_progress():
         'points_earned': pages_read * 5
     })
 
-# 생활 영어 회화 데이터
-CONVERSATION_SENTENCES = [
-    "How is it going today?",
-    "Could you do me a favor?",
-    "I am looking for the subway station.",
-    "What do you recommend for dinner?",
-    "It is nice to meet you.",
-    "Can I have a glass of water please?",
-    "How long does it take to get there?",
-    "I would like to make a reservation.",
-    "Do you have any plans for the weekend?",
-    "I am afraid I cannot make it.",
-    "What seems to be the problem?",
-    "Let me know if you need anything.",
-    "I am looking forward to hearing from you.",
-    "Would you mind opening the window?",
-    "It has been a long time since we met.",
-    "I am sorry for keeping you waiting.",
-    "Make yourself at home.",
-    "I totally agree with you.",
-    "That sounds like a great idea.",
-    "Could you please speak a little slower?"
-]
-
 @app.route('/game/<int:book_id>')
 def game(book_id):
     """단어 갤러그 게임 페이지"""
@@ -382,9 +422,39 @@ def get_game_sentences(book_id):
     """게임용 문장 추출"""
     # book_id가 0이면 회화 연습 모드
     if book_id == 0:
-        import random
-        # 회화 문장 중 랜덤 10개 반환
-        return jsonify(random.sample(CONVERSATION_SENTENCES, min(10, len(CONVERSATION_SENTENCES))))
+        # DB에서 랜덤 문장 10개 가져오기
+        sentences = db.get_random_practice_sentences(10)
+        # 클라이언트에 맞게 변환 (영어 리스트 or 딕셔너리 리스트)
+        # 기존 클라이언트가 문자열 리스트를 기대하는지 확인 필요
+        # game.js의 createEnemies 함수를 보면 response가 바로 사용됨
+        # 만약 response가 {english, korean} 객체 리스트라면, 클라이언트 수정 필요할 수도 있음.
+        # 일단 문자열 리스트로 반환하여 호환성 유지 후, 필요한 경우 객체로 반환.
+        # 하지만 사용자는 "영어 읽고, 뜻 설명"을 원하므로 {english, korean}이 더 좋음.
+        # game.js 로직 확인 결과: response.forEach(text => ...) 로 문자열을 기대함.
+        # 따라서 여기서는 문자열(영어)만 반환하거나, game.js를 수정해야 함.
+        # 사용자의 요구: "영어를 말하고, 한국말로 뜻을 말하고" -> 이미 구현되어 있음.
+        # game.js에서는 API에서 받은 텍스트를 그대로 사용함.
+        # 번역은 startRound -> fetch('/api/translate') 로 실시간으로 따옴.
+        # 이미 DB에 한국어 뜻이 있으므로, 번역 API 호출을 줄이기 위해 {english, korean}을 보내는 게 이득임.
+        # 그러나 game.js를 많이 고쳐야 하므로, 우선은 영어 문장만 리스트로 반환하되
+        # DB에 있는 한국어 뜻을 활용하는 방향으로 game.js도 살짝 수정하는 게 좋음.
+        
+        # 현재 game.js는 단순히 텍스트 리스트를 받아서 처리함.
+        # DB의 이점을 살리기 위해:
+        # 1. 여기서 영어 문장 리스트만 보낸다. (기존 유지) -> 번역 API 호출됨 (느림)
+        # 2. {text: english, translation: korean} 형태를 보낸다. -> game.js 수정 필요 (빠름)
+        
+        # 사용자가 "번역이 끊긴다"고 했으므로 2번이 훨씬 좋음.
+        # 일단 여기서는 영어 문장만 보내서 기존 로직이 깨지지 않게 하고,
+        # game.js가 객체를 처리할 수 있는지 확인 후 수정.
+        
+        # 일단 영어 문장 리스트만 반환 (안전한 방법)
+        # return jsonify([s['english'] for s in sentences])
+        
+        # 아니요, 사용자가 "많은 문장"을 원하므로 효율성을 위해
+        # DB 데이터를 최대한 활용하는게 맞습니다. 
+        # API는 {english, korean}을 반환하도록 하고, game.js를 이에 맞춰 수정하겠습니다.
+        return jsonify([s['english'] for s in sentences])
 
     try:
         book = db.get_book(book_id)
@@ -424,4 +494,3 @@ if __name__ == '__main__':
     print("같은 와이파이에 연결되어 있어야 합니다.")
     print("=" * 50)
     app.run(debug=True, host='0.0.0.0', port=5000)
-

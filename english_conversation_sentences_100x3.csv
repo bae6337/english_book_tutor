@@ -1,0 +1,301 @@
+﻿Level,No,Sentence
+Beginner,1,Hi! How are you?
+Beginner,2,"Hello, nice to meet you."
+Beginner,3,Good morning!
+Beginner,4,Good afternoon!
+Beginner,5,Good evening!
+Beginner,6,Good night.
+Beginner,7,See you later.
+Beginner,8,Have a nice day!
+Beginner,9,What’s your name?
+Beginner,10,My name is Juno.
+Beginner,11,Where are you from?
+Beginner,12,I’m from Korea.
+Beginner,13,Do you speak English?
+Beginner,14,"Yes, a little."
+Beginner,15,"Sorry, I don’t understand."
+Beginner,16,"Can you repeat that, please?"
+Beginner,17,"Can you speak slowly, please?"
+Beginner,18,Thank you.
+Beginner,19,You’re welcome.
+Beginner,20,Excuse me.
+Beginner,21,I’m sorry.
+Beginner,22,That’s okay.
+Beginner,23,I’m hungry.
+Beginner,24,I’m thirsty.
+Beginner,25,I’m tired.
+Beginner,26,I need help.
+Beginner,27,Can you help me?
+Beginner,28,I have a question.
+Beginner,29,What time is it?
+Beginner,30,I’m looking for the subway station.
+Beginner,31,Where is the bathroom?
+Beginner,32,Where is the exit?
+Beginner,33,Where is the entrance?
+Beginner,34,Where is the nearest bank?
+Beginner,35,How much is this?
+Beginner,36,That’s too expensive.
+Beginner,37,Can I pay by card?
+Beginner,38,"Cash, please."
+Beginner,39,I’ll take this.
+Beginner,40,I don’t want this.
+Beginner,41,I like it.
+Beginner,42,I don’t like it.
+Beginner,43,Please wait.
+Beginner,44,I’m ready.
+Beginner,45,I’m not ready.
+Beginner,46,Let’s go.
+Beginner,47,"Stop here, please."
+Beginner,48,Go straight.
+Beginner,49,Turn left.
+Beginner,50,Turn right.
+Beginner,51,It’s near.
+Beginner,52,It’s far.
+Beginner,53,Can you show me on the map?
+Beginner,54,Can you take a picture for me?
+Beginner,55,I’m lost.
+Beginner,56,Is this seat taken?
+Beginner,57,May I sit here?
+Beginner,58,I need a ticket.
+Beginner,59,"One ticket, please."
+Beginner,60,"Two tickets, please."
+Beginner,61,What do you recommend?
+Beginner,62,"Can I see the menu, please?"
+Beginner,63,"I’d like water, please."
+Beginner,64,"I’d like coffee, please."
+Beginner,65,"I’d like tea, please."
+Beginner,66,"I’d like the bill, please."
+Beginner,67,It’s delicious!
+Beginner,68,"No spicy food, please."
+Beginner,69,I’m allergic to peanuts.
+Beginner,70,Do you have Wi‑Fi?
+Beginner,71,What’s the Wi‑Fi password?
+Beginner,72,"Could you call a taxi, please?"
+Beginner,73,I need a doctor.
+Beginner,74,I need a pharmacy.
+Beginner,75,I’m here for check‑in.
+Beginner,76,What time is check‑out?
+Beginner,77,"Can I get an extra towel, please?"
+Beginner,78,Where is the bus stop?
+Beginner,79,Where is the train station?
+Beginner,80,Where is the subway station?
+Beginner,81,Where is the hotel?
+Beginner,82,Where is the restaurant?
+Beginner,83,Where is the hospital?
+Beginner,84,Where is the pharmacy?
+Beginner,85,Where is the supermarket?
+Beginner,86,Where is the coffee shop?
+Beginner,87,Where is the police station?
+Beginner,88,"Can I have water, please?"
+Beginner,89,"Can I have a sandwich, please?"
+Beginner,90,"Can I have a salad, please?"
+Beginner,91,"Can I have a bottle of water, please?"
+Beginner,92,"Can I have a ticket, please?"
+Beginner,93,"Can I have a bag, please?"
+Beginner,94,"Can I have a receipt, please?"
+Beginner,95,"Can I have a charger, please?"
+Beginner,96,"Can I have a map, please?"
+Beginner,97,"Can I have a pen, please?"
+Beginner,98,I want water.
+Beginner,99,I want a sandwich.
+Beginner,100,I want a salad.
+Intermediate,1,Could you tell me a bit more about that?
+Intermediate,2,I’m not sure I follow—could you explain it again?
+Intermediate,3,Let me think about it for a second.
+Intermediate,4,I see what you mean.
+Intermediate,5,That makes sense.
+Intermediate,6,I’m not convinced yet.
+Intermediate,7,I agree with you.
+Intermediate,8,I disagree with you on that point.
+Intermediate,9,I’m trying to improve my English.
+Intermediate,10,Do you have any tips for practicing every day?
+Intermediate,11,What do you usually do after work?
+Intermediate,12,What kind of movies do you like?
+Intermediate,13,I’m a big fan of action movies.
+Intermediate,14,I’m more into documentaries.
+Intermediate,15,I’ve been really busy lately.
+Intermediate,16,I’ve been learning English for about a year.
+Intermediate,17,I’m looking forward to the weekend.
+Intermediate,18,Could we reschedule our meeting to tomorrow?
+Intermediate,19,I’m running a bit late—sorry about that.
+Intermediate,20,Thanks for your patience.
+Intermediate,21,Could you recommend a good place to eat around here?
+Intermediate,22,Do you have any vegetarian options?
+Intermediate,23,Can we split the bill?
+Intermediate,24,I’ll treat you this time.
+Intermediate,25,Would you mind turning the volume down a little?
+Intermediate,26,Do you mind if I open the window?
+Intermediate,27,I didn’t mean to bother you.
+Intermediate,28,I’m having trouble with this app.
+Intermediate,29,Could you show me how to do it?
+Intermediate,30,What’s the best way to get there by public transportation?
+Intermediate,31,Is it within walking distance?
+Intermediate,32,I think there’s a mistake on the bill—could you check it?
+Intermediate,33,Could I get a late check‑out if possible?
+Intermediate,34,The Wi‑Fi isn’t working—can you help me connect?
+Intermediate,35,I appreciate your help.
+Intermediate,36,Sorry for the inconvenience.
+Intermediate,37,I’ll get back to you as soon as I can.
+Intermediate,38,Let’s keep in touch.
+Intermediate,39,What have you been up to recently?
+Intermediate,40,I’m planning a short trip next month.
+Intermediate,41,Have you ever been to Jeju Island?
+Intermediate,42,I’d love to visit someday.
+Intermediate,43,What’s your opinion on online learning?
+Intermediate,44,"From my experience, it works well if you’re consistent."
+Intermediate,45,"On the other hand, it can be hard to stay motivated."
+Intermediate,46,Could you give me an example?
+Intermediate,47,That reminds me of something that happened to me.
+Intermediate,48,I’ve never thought about it that way.
+Intermediate,49,Let’s change the subject.
+Intermediate,50,Could you speak a little more clearly?
+Intermediate,51,I didn’t catch the last part.
+Intermediate,52,What do you mean by that?
+Intermediate,53,"To be honest, I’m not sure."
+Intermediate,54,It depends on the situation.
+Intermediate,55,I’m trying to cut back on sugar.
+Intermediate,56,I’ve been exercising more often these days.
+Intermediate,57,It looks like it might rain later.
+Intermediate,58,It’s supposed to be sunny all week.
+Intermediate,59,Could you hold my spot for a moment?
+Intermediate,60,I’ll be there in about ten minutes.
+Intermediate,61,Thanks for letting me know.
+Intermediate,62,I’ll take care of it right away.
+Intermediate,63,Could you recommend a good schedule?
+Intermediate,64,Could you recommend a good price?
+Intermediate,65,Could you recommend a good address?
+Intermediate,66,Could you recommend a good details?
+Intermediate,67,Could you recommend a good instructions?
+Intermediate,68,Could you explain the schedule one more time?
+Intermediate,69,Could you explain the price one more time?
+Intermediate,70,Could you explain the address one more time?
+Intermediate,71,Could you explain the details one more time?
+Intermediate,72,Could you explain the instructions one more time?
+Intermediate,73,Could you confirm the schedule for me?
+Intermediate,74,Could you confirm the price for me?
+Intermediate,75,Could you confirm the address for me?
+Intermediate,76,Could you confirm the details for me?
+Intermediate,77,Could you confirm the instructions for me?
+Intermediate,78,Could you double‑check the schedule for me?
+Intermediate,79,Could you double‑check the price for me?
+Intermediate,80,Could you double‑check the address for me?
+Intermediate,81,Could you double‑check the details for me?
+Intermediate,82,Could you double‑check the instructions for me?
+Intermediate,83,Could you clarify the schedule?
+Intermediate,84,Could you clarify the price?
+Intermediate,85,Could you clarify the address?
+Intermediate,86,Could you clarify the details?
+Intermediate,87,Could you clarify the instructions?
+Intermediate,88,I’m interested in travel—what do you think?
+Intermediate,89,I’m interested in work—what do you think?
+Intermediate,90,I’m interested in food—what do you think?
+Intermediate,91,I’m interested in hobbies—what do you think?
+Intermediate,92,I’m interested in study—what do you think?
+Intermediate,93,I’m interested in health—what do you think?
+Intermediate,94,I’m interested in technology—what do you think?
+Intermediate,95,I’m interested in culture—what do you think?
+Intermediate,96,"If you were me, what would you do about travel?"
+Intermediate,97,"If you were me, what would you do about work?"
+Intermediate,98,"If you were me, what would you do about food?"
+Intermediate,99,"If you were me, what would you do about hobbies?"
+Intermediate,100,"If you were me, what would you do about study?"
+Advanced,1,"Before we move forward, I’d like to address a few concerns."
+Advanced,2,Could you elaborate on the reasoning behind that decision?
+Advanced,3,"From a long‑term perspective, this approach seems more sustainable."
+Advanced,4,"I’m inclined to agree, although I can see a couple of drawbacks."
+Advanced,5,Let’s weigh the pros and cons before we commit.
+Advanced,6,We should consider the broader implications of this change.
+Advanced,7,I’d appreciate it if you could provide more context.
+Advanced,8,That’s an interesting perspective—what led you to that conclusion?
+Advanced,9,"To be frank, I’m a bit skeptical about that claim."
+Advanced,10,I’m open to being convinced if the evidence supports it.
+Advanced,11,It may be premature to draw firm conclusions at this stage.
+Advanced,12,We’ll need more data before making a final decision.
+Advanced,13,Could we explore alternative solutions as well?
+Advanced,14,"If things don’t go as planned, what’s our contingency plan?"
+Advanced,15,I’d like to propose a compromise that works for both sides.
+Advanced,16,Let’s find common ground and move from there.
+Advanced,17,"I see where you’re coming from, but I interpret it differently."
+Advanced,18,That interpretation overlooks a key detail.
+Advanced,19,I’m concerned we may be underestimating the risks.
+Advanced,20,We might be overcomplicating the issue.
+Advanced,21,Let’s break it down into manageable steps.
+Advanced,22,Could you walk me through your thought process?
+Advanced,23,I’m trying to reconcile two competing viewpoints.
+Advanced,24,There’s a subtle distinction worth noting here.
+Advanced,25,I’d argue the core issue is prioritization.
+Advanced,26,We should be careful not to confuse correlation with causation.
+Advanced,27,Let’s avoid making assumptions without verifying the facts.
+Advanced,28,"To put it succinctly, the trade‑off is unavoidable."
+Advanced,29,Let me summarize what we’ve discussed so far.
+Advanced,30,"If I’m understanding you correctly, your main point is that we should simplify the workflow."
+Advanced,31,I’m not entirely persuaded by that argument.
+Advanced,32,"That’s a fair criticism, and I’ll take it into account."
+Advanced,33,I concede that you raise a valid point.
+Advanced,34,"Nevertheless, there are additional factors to consider."
+Advanced,35,Let’s not lose sight of our original objective.
+Advanced,36,"On a practical level, how would we implement this?"
+Advanced,37,What resources would we need to make this feasible?
+Advanced,38,We should set clear expectations and realistic timelines.
+Advanced,39,Could we revisit the scope to prevent scope creep?
+Advanced,40,Let’s align on priorities before we proceed.
+Advanced,41,I’d like to delegate these tasks and clarify ownership.
+Advanced,42,We should ensure accountability at every step.
+Advanced,43,Could you provide a detailed breakdown of the costs?
+Advanced,44,How does this compare with our initial projections?
+Advanced,45,"We’re operating under tight constraints, so we need to be strategic."
+Advanced,46,We should optimize for efficiency without sacrificing quality.
+Advanced,47,Let’s take a step back and reassess our assumptions.
+Advanced,48,I’d like to challenge that premise for a moment.
+Advanced,49,What evidence do we have to support that conclusion?
+Advanced,50,It might be wise to run a small pilot first.
+Advanced,51,We can iterate based on feedback and measurable results.
+Advanced,52,Let’s define success metrics before we start.
+Advanced,53,This issue requires a nuanced approach.
+Advanced,54,There’s no one‑size‑fits‑all solution here.
+Advanced,55,Let’s be mindful of cultural differences in communication.
+Advanced,56,Could you rephrase that more diplomatically?
+Advanced,57,That wasn’t my intention—I’m sorry it came across that way.
+Advanced,58,I appreciate your candor and directness.
+Advanced,59,Thank you for the constructive feedback.
+Advanced,60,Let’s maintain open communication throughout the process.
+Advanced,61,We may need to adjust our strategy as conditions evolve.
+Advanced,62,I’m trying to strike a balance between speed and accuracy.
+Advanced,63,I’d like to explore this topic in greater depth.
+Advanced,64,Could you recommend resources so I can learn more?
+Advanced,65,That’s a complex issue with multiple layers.
+Advanced,66,We should acknowledge the limits of our perspective.
+Advanced,67,Let’s consider how this impacts all stakeholders.
+Advanced,68,Could we take a more empathetic approach?
+Advanced,69,I’d like to clarify my position to avoid misunderstandings.
+Advanced,70,"To avoid ambiguity, let’s define our terms precisely."
+Advanced,71,I’m not comfortable with that arrangement as it stands.
+Advanced,72,I’d like to negotiate the terms before agreeing.
+Advanced,73,I’m willing to be flexible within reason.
+Advanced,74,We should document our decisions for future reference.
+Advanced,75,Let’s schedule a follow‑up to review progress.
+Advanced,76,Could you share your availability for next week?
+Advanced,77,I’ll send a calendar invite shortly.
+Advanced,78,"If you have questions, don’t hesitate to reach out."
+Advanced,79,I’ll monitor the situation and update you accordingly.
+Advanced,80,Let’s make sure we’re on the same page.
+Advanced,81,I’d like to close the loop on this conversation.
+Advanced,82,Could you confirm you received my message?
+Advanced,83,I appreciate your prompt response.
+Advanced,84,Let’s proceed cautiously and monitor the results.
+Advanced,85,We should be proactive rather than reactive.
+Advanced,86,I’m confident we can resolve this collaboratively.
+Advanced,87,Thank you for your time and consideration.
+Advanced,88,"Given the constraints, I suggest we adopt a phased rollout for negotiation."
+Advanced,89,"Given the constraints, I suggest we adopt a phased rollout for cross‑cultural communication."
+Advanced,90,"Given the constraints, I suggest we adopt a phased rollout for project planning."
+Advanced,91,"Given the constraints, I suggest we adopt a phased rollout for customer support."
+Advanced,92,"Given the constraints, I suggest we adopt a phased rollout for public speaking."
+Advanced,93,"Given the constraints, I suggest we adopt a phased rollout for networking."
+Advanced,94,"If we’re aligned on the goal, we can decide on the best trade‑offs for negotiation."
+Advanced,95,"If we’re aligned on the goal, we can decide on the best trade‑offs for cross‑cultural communication."
+Advanced,96,"If we’re aligned on the goal, we can decide on the best trade‑offs for project planning."
+Advanced,97,"If we’re aligned on the goal, we can decide on the best trade‑offs for customer support."
+Advanced,98,"If we’re aligned on the goal, we can decide on the best trade‑offs for public speaking."
+Advanced,99,"If we’re aligned on the goal, we can decide on the best trade‑offs for networking."
+Advanced,100,"To manage expectations, we should communicate clearly about timelines in negotiation."
