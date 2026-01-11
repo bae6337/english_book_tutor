@@ -777,6 +777,12 @@ function endBonusStage() {
     comboElement.textContent = 0;
     gameState = 'PLAYING';
     sentenceDisplay.style.display = 'block';
+    
+    // [수정] 보너스 게임 잔재 확실히 제거
+    activeSentences = [];
+    enemies = [];
+    balls = [];
+    
     startRound();
 }
 
